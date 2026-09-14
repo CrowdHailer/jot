@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed a bug where unterminated code blocks would cause the parser to diverge.
+
 ## v12.1.1 - 2026-08-12
 
 - Fixed a bug where words could be incorrectly parsed as numbered lists
