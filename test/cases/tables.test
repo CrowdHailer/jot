@@ -123,3 +123,42 @@ determines the alignment for following cells, until the next header.
 </tr>
 </table>
 ```
+
+Multiple-backtick delimiters keep pipes and shorter backtick runs inside code:
+
+```
+| ``a`|b`` | next |
+.
+<table>
+<tr>
+<td><code>a`|b</code></td>
+<td>next</td>
+</tr>
+</table>
+```
+
+Padding around backticks is dropped so snippets can start and end with backticks:
+
+```
+| `` `a|b` `` | next |
+.
+<table>
+<tr>
+<td><code>`a|b`</code></td>
+<td>next</td>
+</tr>
+</table>
+```
+
+Spaces that do not pad backticks remain part of the code:
+
+```
+| `` a|b `` | next |
+.
+<table>
+<tr>
+<td><code> a|b </code></td>
+<td>next</td>
+</tr>
+</table>
+```
