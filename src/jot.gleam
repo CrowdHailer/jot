@@ -2092,8 +2092,8 @@ fn parse_table(
   case take_table_rows(in, [], splitters) {
     #([], _) -> None
     #(rows, in) -> {
-      let rows = table_rows_to_ast(rows, splitters, [], None, [])
-      let #(caption, in) = detect_table_caption(in, splitters)
+      let rows = parse_table_rows(rows, splitters, [], None, [])
+      let #(caption, in) = parse_table_caption(in, splitters)
       Some(#(Table(attributes: attrs, caption: caption, rows: rows), in))
     }
   }
@@ -2170,7 +2170,7 @@ fn is_separator_end(
   }
 }
 
-fn table_rows_to_ast(
+fn parse_table_rows(
   lines: List(List(String)),
   splitters: Splitters,
   alignments: List(Option(TableAlignment)),
@@ -2180,31 +2180,30 @@ fn table_rows_to_ast(
   case lines, pending {
     [], None -> list.reverse(rows)
     [], Some(cells) -> {
-      let row =
-        TableRow(False, table_cells_to_ast(cells, alignments, splitters))
+      let row = TableRow(False, parse_table_cells(cells, alignments, splitters))
       list.reverse([row, ..rows])
     }
     [cells, ..lines], _ -> {
       case is_separator_line(cells), pending {
         Ok(alignments), None ->
-          table_rows_to_ast(lines, splitters, alignments, None, rows)
+          parse_table_rows(lines, splitters, alignments, None, rows)
         Ok(alignments), Some(previous_cells) -> {
           let row =
             TableRow(
               True,
-              table_cells_to_ast(previous_cells, alignments, splitters),
+              parse_table_cells(previous_cells, alignments, splitters),
             )
-          table_rows_to_ast(lines, splitters, alignments, None, [row, ..rows])
+          parse_table_rows(lines, splitters, alignments, None, [row, ..rows])
         }
         Error(Nil), None ->
-          table_rows_to_ast(lines, splitters, alignments, Some(cells), rows)
+          parse_table_rows(lines, splitters, alignments, Some(cells), rows)
         Error(Nil), Some(previous_cells) -> {
           let row =
             TableRow(
               False,
-              table_cells_to_ast(previous_cells, alignments, splitters),
+              parse_table_cells(previous_cells, alignments, splitters),
             )
-          table_rows_to_ast(lines, splitters, alignments, Some(cells), [
+          parse_table_rows(lines, splitters, alignments, Some(cells), [
             row,
             ..rows
           ])
@@ -2214,7 +2213,7 @@ fn table_rows_to_ast(
   }
 }
 
-fn detect_table_caption(
+fn parse_table_caption(
   in: String,
   splitters: Splitters,
 ) -> #(Option(List(Inline)), String) {
@@ -2250,7 +2249,7 @@ fn take_table_caption(
   }
 }
 
-fn table_cells_to_ast(
+fn parse_table_cells(
   cells: List(String),
   alignments: List(Option(TableAlignment)),
   splitters: Splitters,
@@ -2262,7 +2261,7 @@ fn table_cells_to_ast(
       let content = drop_empty_text(content)
       [
         TableCell(alignment: None, content:),
-        ..table_cells_to_ast(cells, [], splitters)
+        ..parse_table_cells(cells, [], splitters)
       ]
     }
     [cell, ..cells], [alignment, ..alignments] -> {
@@ -2270,7 +2269,7 @@ fn table_cells_to_ast(
       let content = drop_empty_text(content)
       [
         TableCell(alignment:, content:),
-        ..table_cells_to_ast(cells, alignments, splitters)
+        ..parse_table_cells(cells, alignments, splitters)
       ]
     }
   }
