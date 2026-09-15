@@ -2227,23 +2227,24 @@ fn parse_table_caption(
 
 fn take_table_caption(
   in: String,
-  caption: List(Inline),
+  acc: List(Inline),
   splitters: Splitters,
 ) -> #(Option(List(Inline)), String) {
   let #(line, in) = slurp_to_line_end(in)
   case string.trim(line) {
-    "" -> #(Some(caption), in)
+    "" -> #(Some(list.reverse(acc)), in)
     _ -> {
       let #(new, _) = parse_inline(line, splitters, "", [])
-      let caption = list.append(caption, new)
+      // Move new inlines onto the reversed accumulator
+      let acc = list.fold(new, acc, fn(acc, inline) { [inline, ..acc] })
       case in {
         " " <> _ ->
           take_table_caption(
             string.trim_start(in),
-            list.append(caption, [Text("\n")]),
+            [Text("\n"), ..acc],
             splitters,
           )
-        _ -> #(Some(caption), in)
+        _ -> #(Some(list.reverse(acc)), in)
       }
     }
   }
