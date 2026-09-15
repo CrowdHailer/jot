@@ -2236,14 +2236,14 @@ fn take_table_caption(
     _ -> {
       let #(new, _) = parse_inline(line, splitters, "", [])
       let caption = list.append(caption, new)
-      case string.starts_with(in, " ") {
-        True ->
+      case in {
+        " " <> _ ->
           take_table_caption(
             string.trim_start(in),
             list.append(caption, [Text("\n")]),
             splitters,
           )
-        False -> #(Some(caption), in)
+        _ -> #(Some(caption), in)
       }
     }
   }
