@@ -412,8 +412,6 @@ fn parse_block_after_indent_checked(
   }
 }
 
-// Indentation is only significant for list item or footnote nesting.
-
 fn parse_container(
   in: String,
   refs: Refs,
@@ -1727,7 +1725,7 @@ fn parse_table_code(in: String, count: Int) -> #(String, String) {
     "`" <> in -> parse_table_code(in, count + 1)
     _ -> {
       let #(content, in) = parse_code_content(in, count, "")
-      // return the raw content as we separately parse inline contents of a cell
+      // Return the raw content as we separately parse inline contents of a cell
       let wrapper = string.repeat("`", count)
       #(wrapper <> content <> wrapper, in)
     }
@@ -2221,7 +2219,7 @@ fn detect_table_caption(
   splitters: Splitters,
 ) -> #(Option(List(Inline)), String) {
   case in {
-    // can optionally be one blank line before caption
+    // There can optionally be one blank line before caption
     "^" <> in | "\n^" <> in ->
       take_table_caption(string.trim_start(in), [], splitters)
     _ -> #(None, in)
